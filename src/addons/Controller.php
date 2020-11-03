@@ -38,11 +38,53 @@ abstract class Controller
 
         // 控制器初始化
         $this->initialize();
+		// 前置操作方法
+        foreach ((array) $this->beforeActionList as $method => $options) {
+            is_numeric($method) ?
+                $this->beforeAction($options) :
+                $this->beforeAction($method, $options);
+        }
     }
 
     // 初始化
     protected function initialize()
     {}
+	/**
+     * 前置操作
+     * @access protected
+     * @param  string $method  前置操作方法名
+     * @param  array  $options 调用参数 ['only'=>[...]] 或者['except'=>[...]]
+     */
+    protected function beforeAction($method, $options = [])
+    {
+        if (isset($options['only'])) {
+            if (is_string($options['only'])) {
+                $options['only'] = explode(',', $options['only']);
+            }
+
+            $only = array_map(function ($val) {
+                return strtolower($val);
+            }, $options['only']);
+
+            if (!in_array($this->request->action(), $only)) {
+                return;
+            }
+        } elseif (isset($options['except'])) {
+            if (is_string($options['except'])) {
+                $options['except'] = explode(',', $options['except']);
+            }
+
+            $except = array_map(function ($val) {
+                return strtolower($val);
+            }, $options['except']);
+
+            if (in_array($this->request->action(), $except)) {
+                return;
+            }
+        }
+
+        call_user_func([$this, $method]);
+    }
 
     /**
      * 获取插件标识
