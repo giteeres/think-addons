@@ -40,7 +40,7 @@ abstract class Controller
         $this->initialize();
 		// 前置操作方法
         foreach ((array) $this->beforeActionList as $method => $options) {
-            is_numeric($method) ?
+            is_numeric($method) ? 
                 $this->beforeAction($options) :
                 $this->beforeAction($method, $options);
         }
